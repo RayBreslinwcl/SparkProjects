@@ -5,7 +5,7 @@
   <version>1.0-SNAPSHOT</version>
   <inceptionYear>2008</inceptionYear>
   <properties>
-    <scala.version>2.7.0</scala.version>
+    <scala.version>2.11.8</scala.version>
   </properties>
 
   <repositories>
@@ -30,17 +30,50 @@
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
     </dependency>
+
+<!--    <dependency>-->
+<!--      <groupId>org.apache.kafka</groupId>-->
+<!--      <artifactId>kafka-clients</artifactId>-->
+<!--      <version>0.10.0.0</version>-->
+<!--&lt;!&ndash;      <exclusions>&ndash;&gt;-->
+<!--&lt;!&ndash;        <exclusion>&ndash;&gt;-->
+<!--&lt;!&ndash;          <artifactId>jackson-databind</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;          <groupId>com.fasterxml.jackson.core</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;        </exclusion>&ndash;&gt;-->
+<!--&lt;!&ndash;      </exclusions>&ndash;&gt;-->
+<!--    </dependency>-->
+<!--    <dependency>-->
+<!--      <groupId>org.apache.kafka</groupId>-->
+<!--      <artifactId>kafka_2.11</artifactId>-->
+<!--      <version>1.1.0</version>-->
+<!--&lt;!&ndash;      <exclusions>&ndash;&gt;-->
+<!--&lt;!&ndash;        <exclusion>&ndash;&gt;-->
+<!--&lt;!&ndash;          <artifactId>jackson-databind</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;          <groupId>com.fasterxml.jackson.core</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;        </exclusion>&ndash;&gt;-->
+<!--&lt;!&ndash;      </exclusions>&ndash;&gt;-->
+<!--    </dependency>-->
+
+
+    <!-- Spark Streaming -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.4</version>
-      <scope>test</scope>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming_2.11</artifactId>
+      <version>2.1.0</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.specs</groupId>
-      <artifactId>specs</artifactId>
-      <version>1.2.5</version>
-      <scope>test</scope>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming-kafka-0-10_2.11</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+
+
+
+    <dependency>
+      <groupId>redis.clients</groupId>
+      <artifactId>jedis</artifactId>
+      <version>2.9.0</version>
     </dependency>
   </dependencies>
 
