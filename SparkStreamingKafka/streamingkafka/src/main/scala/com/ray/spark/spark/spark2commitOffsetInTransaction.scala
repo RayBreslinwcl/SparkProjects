@@ -1,8 +1,9 @@
 package com.ray.spark.spark
 
+import com.ray.spark.utils.c3p0Pools
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.spark.SparkConf
+import org.apache.spark.{SparkConf, TaskContext}
 import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka010._
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -54,18 +55,69 @@ object spark2commitOffsetInTransaction {
         */
       val ranges: Array[OffsetRange] = rdd.asInstanceOf[HasOffsetRanges].offsetRanges
 
+
       val words=rdd.map(_.value()).map(line=>line.split(" "))
 
       val word=words.flatMap(arr=>arr.map(word=>(word,1)))
       val wordCountResult=word.reduceByKey(_+_)
 
-      wordCountResult.foreach(println)
+      wordCountResult.foreachPartition(iter=>{
+        //获取连接
+        val conn=c3p0Pools.getConnection
+        //开启事务
+        conn.setAutoCommit(false)
+        /**
+          * 1.存储偏移量
+          */
+        //获取当前分区偏移量范围
+        val partitionRange= ranges(TaskContext.getPartitionId())
+        val updatesql=
+          """
+            |insert into spark_kafka_offset(topic,partitionId,untilOffset,groupId)
+            |values(?,?,?,?) on duplicate key update untilOffset=?
+            |
+        """.stripMargin
+        val pstmt= conn.prepareStatement(updatesql)
+        pstmt.setString(1,partitionRange.topic)
+        pstmt.setInt(2,partitionRange.partition)
+        pstmt.setLong(3,partitionRange.untilOffset)
+        pstmt.setString(4,group) //组名
+        //执行
+        pstmt.executeUpdate()
 
 
-      /**
-        * 2.提交偏移量
-        */
-      stream.asInstanceOf[CanCommitOffsets].commitAsync(ranges)
+        /**
+          * 2.存储计算结果
+          */
+        //将计算结果存入
+        val wc_updatesql=
+          """
+            |insert into spark_wc(word,cnt)
+            |values(?,?) on duplicate key update cnt=cnt+?
+            |
+        """.stripMargin
+        val pstmt_wc= conn.prepareStatement(updatesql)
+        pstmt_wc.setString(1,partitionRange.topic)
+        pstmt_wc.setInt(2,partitionRange.partition)
+        iter.foreach(tp=>{
+          pstmt_wc.setString(1,tp._1)
+          pstmt_wc.setInt(2,tp._2)
+          pstmt_wc.setInt(3,tp._2)
+          pstmt_wc.addBatch() //添加批次
+
+        })
+        pstmt_wc.executeBatch()//执行批次
+
+        //事务提交
+        conn.commit()
+
+        //关闭资源
+        if(pstmt!=null) pstmt.close()
+        if(pstmt_wc!=null) pstmt_wc.close()
+        if(conn!=null) conn.close()
+
+      })
+
 
 
     })
