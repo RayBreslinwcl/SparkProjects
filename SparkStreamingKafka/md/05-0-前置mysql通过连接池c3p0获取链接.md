@@ -31,18 +31,18 @@
 参考[连接](https://blog.csdn.net/jdq928/article/details/84519141)，或者官网
 
 ```properties
-c3p0.JDBC.url=jdbc:mysql://192.168.0.8:3306/sparkProjects?characterEncoding=utf8 
-c3p0.DriverClass=com.mysql.jdbc.Driver 
+c3p0.driverClass=com.mysql.jdbc.Driver 
+c3p0.jdbcUrl=jdbc:mysql://192.168.0.8:3306/sparkProjects
 c3p0.user=root 
-c3p0.pwd=123456
+c3p0.password=123456
 
-c3p0.acquireIncrement=3 
-c3p0.idleConnectionTestPeriod=60 
-c3p0.initialPoolSize=10 
-c3p0.maxIdleTime=60 
-c3p0.maxPoolSize=20 
-c3p0.maxStatements=100 
-c3p0.minPoolSize=5 
+#c3p0.acquireIncrement=3
+#c3p0.idleConnectionTestPeriod=60
+#c3p0.initialPoolSize=10
+#c3p0.maxIdleTime=60
+#c3p0.maxPoolSize=20
+#c3p0.maxStatements=100
+#c3p0.minPoolSize=5
 ```
 
 
@@ -58,7 +58,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
 
 object c3p0Pools {
 
-  private val dataSource=new ComboPooledDataSource()
+  private val dataSource=new ComboPooledDataSource("c3p0.properties")
 
   def getDataSource=dataSource
 
@@ -71,7 +71,7 @@ object c3p0Pools {
 
   def main(args: Array[String]): Unit = {
 
-    val connection=getConnection
+    val connection=c3p0Pools.getConnection
 
     val restSet= connection.prepareStatement("select * from DEPT")
 

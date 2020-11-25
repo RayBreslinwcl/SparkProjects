@@ -19,13 +19,13 @@ object spark2commitOffsetInTransaction {
 
     //创建 SparkConf 对象
     val sparkConf: SparkConf = new
-        SparkConf().setMaster("local[*]").setAppName("spark2commitOffsetInTransaction")
+        SparkConf().setMaster("local[2]").setAppName("spark2commitOffsetInTransaction")
     //创建 StreamingContext 对象
     val ssc: StreamingContext = new StreamingContext(sparkConf, Seconds(3))
     //kafka 参数声明
     val brokers = "hadoop:9092" //"hadoop101:9092,hadoop102:9092"
     val topic = "wc"
-    val group = "bigdata3"
+    val group = "bigdata4"
     val deserialization = "org.apache.kafka.common.serialization.StringDeserializer"
 
     val kafkaParams = Map[String, Object](
@@ -82,6 +82,7 @@ object spark2commitOffsetInTransaction {
         pstmt.setInt(2,partitionRange.partition)
         pstmt.setLong(3,partitionRange.untilOffset)
         pstmt.setString(4,group) //组名
+        pstmt.setLong(5,partitionRange.untilOffset)
         //执行
         pstmt.executeUpdate()
 
@@ -96,9 +97,7 @@ object spark2commitOffsetInTransaction {
             |values(?,?) on duplicate key update cnt=cnt+?
             |
         """.stripMargin
-        val pstmt_wc= conn.prepareStatement(updatesql)
-        pstmt_wc.setString(1,partitionRange.topic)
-        pstmt_wc.setInt(2,partitionRange.partition)
+        val pstmt_wc= conn.prepareStatement(wc_updatesql)
         iter.foreach(tp=>{
           pstmt_wc.setString(1,tp._1)
           pstmt_wc.setInt(2,tp._2)

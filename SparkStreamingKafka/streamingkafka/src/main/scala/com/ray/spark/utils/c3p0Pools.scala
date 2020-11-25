@@ -4,7 +4,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
 
 object c3p0Pools {
 
-  private val dataSource=new ComboPooledDataSource()
+  private val dataSource=new ComboPooledDataSource("c3p0.properties")
 
   def getDataSource=dataSource
 
@@ -17,7 +17,7 @@ object c3p0Pools {
 
   def main(args: Array[String]): Unit = {
 
-    val connection=getConnection
+    val connection=c3p0Pools.getConnection
 
     val restSet= connection.prepareStatement("select * from DEPT")
 
