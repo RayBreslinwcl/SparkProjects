@@ -58,6 +58,7 @@ object spark2commitOffsetByHand {
       val words=rdd.map(_.value()).map(line=>line.split(" "))
 
       val word=words.flatMap(arr=>arr.map(word=>(word,1)))
+
       val wordCountResult=word.reduceByKey(_+_)
 
       wordCountResult.foreach(println)
